@@ -56,17 +56,15 @@ async fn main() {
 	}
 }
 
-// https://api.scryfall.com/cards/named?&format=image&image=png&exact=Adaptive Automaton&set=brr
 async fn get_card_image(name: &str, set: Option<&str>) -> anyhow::Result<bytes::Bytes> {
-	println!("Downloading: name: {name}, set: {set:?}");
-	static CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
+	static CLIENT: LazyLock<reqwest::Client> = LazyLock::new(reqwest::Client::new);
 
 	Ok(CLIENT.get("https://api.scryfall.com/cards/named")
 		.query(&[
 			("format", "image"),
 			("version", "png"),
 			("exact", name),
-			("set", &set.unwrap_or_default()),
+			("set", set.unwrap_or_default()),
 		])
 		.header(reqwest::header::USER_AGENT, "yank-images")
 		.header(reqwest::header::ACCEPT, "*/*")
