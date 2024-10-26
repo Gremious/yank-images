@@ -18,7 +18,6 @@ Options:
   -i <INPUT>               Deck File
   -o <OUTPUT>              Output Directory
   -u, --upscale            Upscale Images if you have `waifu2x-ncnn-vulkan` in path
-  -f, --futures <FUTURES>  Number of simultaneous upscaling commands to run
   -h, --help               Print help
   -V, --version            Print version
 ```
@@ -44,7 +43,6 @@ Card list will look like:
     - (though you can ommit output folder and it'll create a `./out` for you)
 3. Wait for it to download all the images
 4. If you have `waifu2x-ncnn-vulkan`([here](https://github.com/nihui/waifu2x-ncnn-vulkan)) in your path, you can upscale the images by adding `--upscale`
-    - (You can also specify the number of simultaneous upscaling commands to run with `--futures`, default 10)
     - (It'll output the upscale images to `./output-folder/upscaled`)
     - (Sorry it just upscales 4x with max denoise cause that looks best on my printer and with my eyeballs)
         - (Brother MFC-L3770CDW)
