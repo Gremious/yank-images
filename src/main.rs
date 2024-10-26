@@ -36,15 +36,16 @@ async fn main() {
 		.lines()
 		.map(|line| {
 			let skipped_number = if let Some((_, r)) = line.split_once(' ') { r } else { line };
-			let card_name = skipped_number.chars().take_while(|c| !['(', '*', '^', '['].contains(c)).collect::<String>();
-			let last_stop = card_name.len();
-			let card_name = card_name.trim().to_owned();
+			let name_till_paren = skipped_number.chars().take_while(|c| !['(', '*', '^', '['].contains(c)).collect::<String>();
+			let last_stop = name_till_paren.len();
 
 			let set_name = if skipped_number.chars().nth(last_stop).is_some_and(|c| c == '(') {
 				let (set_name, _) = skipped_number[last_stop + 1..].split_once(')').unwrap();
 				Some(set_name)
 			} else { None };
 
+			let illegal_chars = [ '/', ':', '\\', '?', '*', '+', '%', '.', '"', '<', '>', '|'];
+			let card_name = name_till_paren.replace(illegal_chars, "_").trim().to_owned();
 			let output_path = output.clone().tap_mut(|path| path.push(card_name.clone())).tap_mut(|path| { path.set_extension("png"); });
 
 			(card_name, set_name, output_path)
