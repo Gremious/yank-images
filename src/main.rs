@@ -36,7 +36,7 @@ async fn main() {
 				Some(set_name)
 			} else { None };
 
-			(card_name, set_name)
+			(card_name.trim().to_owned(), set_name)
 		});
 
 	// "We kindly ask that you insert 50 – 100 milliseconds of delay between
