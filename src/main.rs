@@ -71,8 +71,6 @@ async fn main() {
 				.tap_mut(|p| p.push("upscaled"))
 				.tap_mut(|p| p.push(format!("{name}_x2_d3.png")));
 
-			// TODO: Futures stream
-
 			// For printing at 1200 dpi
 			// 1200dpi -> 2400dpi did not seem to improve quality unlike 600 -> 1200
 			// max denoise looked slightly better than no denoise
