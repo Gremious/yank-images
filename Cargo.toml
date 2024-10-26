@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reqwest = "*"
-anyhow = "*"
+reqwest = "0.12"
+anyhow = "1"
+scan_fmt = "0.2.6"
+clap = { version = "4.5.20", features = ["derive"] }
 
