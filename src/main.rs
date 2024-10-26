@@ -16,12 +16,6 @@ struct Args {
     output: Option<std::path::PathBuf>,
 }
 
-#[derive(Debug)]
-struct Card {
-	name: String,
-	set: String,
-}
-
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
