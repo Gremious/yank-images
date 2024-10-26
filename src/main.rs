@@ -1,5 +1,5 @@
 use clap::Parser;
-use scan_fmt::{scan_fmt, scan_fmt_some};
+use scan_fmt::scan_fmt_some;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
