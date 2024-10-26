@@ -6,6 +6,9 @@ so I thought I'd make it slightly nicer and put it out there in return for a shi
 
 Now there is a real tool for getting your card pngs from archidekt since it doesn't let you export those, so you can print your proxies easy peasy.
 
+
+release: like, tomorrow, or whenever I'm not tired. For now you can `cargo build --release` this though
+
 ### Usage:
 
 ```bash
