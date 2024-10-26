@@ -54,7 +54,6 @@ async fn main() {
 		std::fs::write(&out, img).unwrap();
 		outputs.push((name, out));
 		sleep(std::time::Duration::from_millis(150)).await;
-		break;
 	}
 
 	if args.upscale {
