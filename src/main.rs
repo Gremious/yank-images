@@ -3,6 +3,7 @@ use std::{path::PathBuf, sync::LazyLock};
 use clap::Parser;
 use futures::StreamExt;
 use tap::Tap;
+use tokio::time::sleep;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -51,11 +52,11 @@ async fn main() {
 	// "We kindly ask that you insert 50 – 100 milliseconds of delay between
 	// the requests you send to the server at api.scryfall.com.
 	// (i.e., 10 requests per second on average)."
-	// for (name, set, out_path) in &cards {
-		// let img = get_card_image(&name, set).await.unwrap();
-		// std::fs::write(&out_path, img).unwrap();
-		// sleep(std::time::Duration::from_millis(150)).await;
-	// }
+	for (name, set, out_path) in &cards {
+		let img = get_card_image(&name, set).await.unwrap();
+		std::fs::write(&out_path, img).unwrap();
+		sleep(std::time::Duration::from_millis(150)).await;
+	}
 
 	if args.upscale {
 		let mut futures = Vec::new();

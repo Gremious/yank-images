@@ -1,15 +1,15 @@
 [package]
 name = "yank-images"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 
 [dependencies]
 reqwest = "0.12"
 anyhow = "1"
-clap = { version = "4.5.20", features = ["derive"] }
-tokio = { version = "1.41.0", features = ["full"] }
-bytes = "1.8.0"
-tap = "1.0.1"
-regex = "1.11.1"
-futures = "0.3.31"
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+bytes = "1"
+tap = "1"
+regex = "1"
+futures = "0.3"
 
