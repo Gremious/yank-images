@@ -55,8 +55,12 @@ async fn main() {
 	// the requests you send to the server at api.scryfall.com.
 	// (i.e., 10 requests per second on average)."
 	for (name, set, out_path) in &cards {
-		println!("Downloading: |{}|", name);
-		if out_path.exists() { continue; }
+		if out_path.exists() {
+			println!("Skipping (exists): |{}|", name);
+			continue;
+		} else {
+			println!("Downloading: |{}|", name);
+		}
 		let img = get_card_image(&name, set).await.unwrap();
 		std::fs::write(&out_path, img).unwrap();
 		sleep(std::time::Duration::from_millis(150)).await;
