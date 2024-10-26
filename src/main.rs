@@ -38,6 +38,7 @@ async fn main() {
 			let skipped_number = if let Some((_, r)) = line.split_once(' ') { r } else { line };
 			let card_name = skipped_number.chars().take_while(|c| !['(', '*', '^', '['].contains(c)).collect::<String>();
 			let last_stop = card_name.len();
+			let card_name = card_name.trim().to_owned();
 
 			let set_name = if skipped_number.chars().nth(last_stop).is_some_and(|c| c == '(') {
 				let (set_name, _) = skipped_number[last_stop + 1..].split_once(')').unwrap();
@@ -46,13 +47,14 @@ async fn main() {
 
 			let output_path = output.clone().tap_mut(|path| path.push(card_name.clone())).tap_mut(|path| { path.set_extension("png"); });
 
-			(card_name.trim().to_owned(), set_name, output_path)
+			(card_name, set_name, output_path)
 		}).collect::<Vec<_>>();
 
 	// "We kindly ask that you insert 50 – 100 milliseconds of delay between
 	// the requests you send to the server at api.scryfall.com.
 	// (i.e., 10 requests per second on average)."
 	for (name, set, out_path) in &cards {
+		println!("Downloading: |{}|", name);
 		let img = get_card_image(&name, set).await.unwrap();
 		std::fs::write(&out_path, img).unwrap();
 		sleep(std::time::Duration::from_millis(150)).await;
