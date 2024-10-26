@@ -1,8 +1,8 @@
 use std::{path::PathBuf, sync::LazyLock};
 
 use clap::Parser;
+use futures::StreamExt;
 use tap::Tap;
-use tokio::time::sleep;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -18,6 +18,10 @@ struct Args {
     /// Upscale Images if you have `waifu2x-ncnn-vulkan` in path.
     #[arg(short, long)]
     upscale: bool,
+
+    /// Number of simultaneous upscaling commands to run.
+    #[arg(short, long)]
+    futures: Option<usize>,
 }
 
 #[tokio::main]
@@ -25,7 +29,6 @@ async fn main() {
     let args = Args::parse();
 	let output = if let Some(o) = args.output { o } else { PathBuf::from("out") };
 	std::fs::create_dir_all(&output).unwrap();
-
 
 	let deckfile = std::fs::read_to_string(&args.input).expect("Failed to read file");
 	let cards = deckfile
@@ -48,13 +51,15 @@ async fn main() {
 	// "We kindly ask that you insert 50 – 100 milliseconds of delay between
 	// the requests you send to the server at api.scryfall.com.
 	// (i.e., 10 requests per second on average)."
-	for (name, set, out_path) in &cards {
-		let img = get_card_image(&name, set).await.unwrap();
-		std::fs::write(&out_path, img).unwrap();
-		sleep(std::time::Duration::from_millis(150)).await;
-	}
+	// for (name, set, out_path) in &cards {
+		// let img = get_card_image(&name, set).await.unwrap();
+		// std::fs::write(&out_path, img).unwrap();
+		// sleep(std::time::Duration::from_millis(150)).await;
+	// }
 
 	if args.upscale {
+		let mut futures = Vec::new();
+
 		for (name, _, out_path) in cards {
 			std::fs::create_dir_all(format!("{}/upscaled", output.display())).unwrap();
 
@@ -63,20 +68,25 @@ async fn main() {
 				.tap_mut(|p| p.push("upscaled"))
 				.tap_mut(|p| p.push(format!("{name}_x2_d3.png")));
 
-			println!("Upscaling: {}", output.display());
-
 			// TODO: Futures stream
 
 			// For printing at 1200 dpi
-			// 2400dpi did not seem to improve quality
+			// 1200dpi -> 2400dpi did not seem to improve quality unlike 600 -> 1200
 			// max denoise looked slightly better than no denoise
-			tokio::process::Command::new("waifu2x-ncnn-vulkan")
+			let future = tokio::process::Command::new("waifu2x-ncnn-vulkan")
 				.arg("-i").arg(&out_path)
 				.arg("-o").arg(&output)
 				.arg("-s").arg("4")
 				.arg("-n").arg("3")
-				.status().await.inspect_err(|e| eprintln!("{e}")).ok();
+				.status();
+
+			futures.push(future);
 		}
+
+		let stream = futures::stream::iter(futures).buffer_unordered(args.futures.unwrap_or(10));
+		let results = stream.collect::<Vec<_>>().await;
+
+		results.into_iter().for_each(|r| if r.is_err() { eprintln!("{:?}", r); });
 	}
 }
 
