@@ -1,7 +1,6 @@
 use std::{path::PathBuf, sync::LazyLock};
 
 use clap::Parser;
-use futures::StreamExt;
 use tap::Tap;
 use tokio::time::sleep;
 
@@ -19,10 +18,6 @@ struct Args {
     /// Upscale Images if you have `waifu2x-ncnn-vulkan` in path.
     #[arg(short, long)]
     upscale: bool,
-
-    /// Number of simultaneous upscaling commands to run.
-    #[arg(short, long)]
-    futures: Option<usize>,
 }
 
 #[tokio::main]
@@ -67,9 +62,14 @@ async fn main() {
 	}
 
 	if args.upscale {
-		let mut futures = Vec::new();
-
 		for (name, _, out_path) in cards {
+			if !out_path.exists() {
+				eprintln!("Skipping (exists): |{}|", name);
+				continue;
+			} else {
+				println!("Upscaling: |{}|", name);
+			};
+
 			std::fs::create_dir_all(format!("{}/upscaled", output.display())).unwrap();
 
 			let output = out_path.clone()
@@ -80,20 +80,13 @@ async fn main() {
 			// For printing at 1200 dpi
 			// 1200dpi -> 2400dpi did not seem to improve quality unlike 600 -> 1200
 			// max denoise looked slightly better than no denoise
-			let future = tokio::process::Command::new("waifu2x-ncnn-vulkan")
+			tokio::process::Command::new("waifu2x-ncnn-vulkan")
 				.arg("-i").arg(&out_path)
 				.arg("-o").arg(&output)
 				.arg("-s").arg("4")
 				.arg("-n").arg("3")
-				.status();
-
-			futures.push(future);
+				.status().await.inspect_err(|e| eprintln!("Failed to upscale: {}", e)).ok();
 		}
-
-		let stream = futures::stream::iter(futures).buffer_unordered(args.futures.unwrap_or(10));
-		let results = stream.collect::<Vec<_>>().await;
-
-		results.into_iter().for_each(|r| if r.is_err() { eprintln!("{:?}", r); });
 	}
 }
 
