@@ -14,6 +14,10 @@ struct Args {
     /// Output Directory
     #[arg(short)]
     output: Option<std::path::PathBuf>,
+
+    /// Upscale Images if you have `waifu2x-ncnn-vulkan` in path.
+    #[arg(short, long)]
+    upscale: bool,
 }
 
 #[tokio::main]
@@ -39,14 +43,41 @@ async fn main() {
 			(card_name.trim().to_owned(), set_name)
 		});
 
+	let mut outputs = Vec::with_capacity(deckfile.lines().count());
+
 	// "We kindly ask that you insert 50 – 100 milliseconds of delay between
 	// the requests you send to the server at api.scryfall.com.
 	// (i.e., 10 requests per second on average)."
 	for (name, set) in cards {
 		let img = get_card_image(&name, set).await.unwrap();
 		let out = output.clone().tap_mut(|path| path.push(name.clone())).tap_mut(|path| { path.set_extension("png"); });
-		std::fs::write(out, img).unwrap();
+		std::fs::write(&out, img).unwrap();
+		outputs.push((name, out));
 		sleep(std::time::Duration::from_millis(150)).await;
+		break;
+	}
+
+	if args.upscale {
+		for (name, path) in outputs {
+			std::fs::create_dir_all(&format!("{}/upscaled", output.display())).unwrap();
+
+			let output = path.clone()
+				.tap_mut(|p| { p.pop(); })
+				.tap_mut(|p| p.push("upscaled"))
+				.tap_mut(|p| p.push(format!("{name}_x2_d3.png")));
+
+			println!("Upscaling: {}", output.display());
+
+			// For printing at 1200 dpi
+			// 2400dpi did not seem to improve quality
+			// max denoise looked slightly better than no denoise
+			tokio::process::Command::new("waifu2x-ncnn-vulkan")
+				.arg("-i").arg(&path)
+				.arg("-o").arg(&output)
+				.arg("-s").arg("4")
+				.arg("-n").arg("3")
+				.status().await.unwrap();
+		}
 	}
 }
 
