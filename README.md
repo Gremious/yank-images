@@ -1,13 +1,4 @@
-was going to be just a personal private tool cause one didn't exist at first glance
-
-but then I saw hacktoberfest was on
-
-so I thought I'd make it slightly nicer and put it out there in return for a shirt
-
-Now there is a real tool for getting your card pngs from archidekt since it doesn't let you export those, so you can print your proxies easy peasy.
-
-
-release: like, tomorrow, or whenever I'm not tired. For now you can `cargo build --release` this though
+For now you can `cargo build --release` this cause I need to boot up windows to give you a windows binary and I can't be bothered
 
 ### Usage:
 
